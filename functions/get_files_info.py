@@ -1,8 +1,5 @@
 import os
-import unittest
-from os import stat_result
 from pathlib import Path
-from stat import *
 
 from functions.utils import check_path_safety
 
@@ -21,7 +18,7 @@ def dir_size(path: Path | str, ignore_dot=True) -> int:
         for f in path.iterdir():
             if ignore_dot and is_hidden(f):
                 continue
-            size += dir_size(f)
+            size += dir_size(f, ignore_dot)
     else:
         size += path.stat().st_size
     return size
@@ -31,7 +28,7 @@ def get_files_info(cwd: str, sub_dir: str = "") -> str:
     if sub_dir != "":
         try:
             check_path_safety(sub_dir)
-        except ValueError as err:
+        except Exception as err:
             return err.args[0]
 
     target_dir = Path(os.path.join(cwd, sub_dir))
