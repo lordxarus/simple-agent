@@ -4,7 +4,6 @@ from ..get_files_info import get_files_info
 from ..utils import check_has_at_least
 
 
-
 class TestGetFilesInfo(unittest.TestCase):
 
     def test_double_dot(self):
@@ -36,4 +35,10 @@ class TestGetFilesInfo(unittest.TestCase):
         assert (
             get_files_info("calculator", "/bin")
             == 'error: sub_dir cannot begin with "/"'
+        )
+
+    def test_non_existent(self):
+        assert (
+            get_files_info("calculator", "./bin/blah/blee/bloo")
+            == "error: directory not found calculator/bin/blah/blee/bloo"
         )

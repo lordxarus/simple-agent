@@ -4,7 +4,7 @@ from os import stat_result
 from pathlib import Path
 from stat import *
 
-from functions.utils import sanitize_path
+from functions.utils import check_path_safety
 
 
 def is_hidden(dir: Path | str) -> bool:
@@ -30,18 +30,18 @@ def dir_size(path: Path | str, ignore_dot=True) -> int:
 def get_files_info(cwd: str, sub_dir: str = "") -> str:
     if sub_dir != "":
         try:
-            sanitize_path(sub_dir)
+            check_path_safety(sub_dir)
         except ValueError as err:
             return err.args[0]
-    info_dir = Path(os.path.join(cwd, sub_dir))
-    if info_dir.name == "":
-        cwd = info_dir.absolute().as_posix()
-        info_dir = info_dir.absolute()
-    if info_dir.parts[0] != cwd:
-        return f"error: cannot list {info_dir} because it is outside of the working directory {cwd}"
+
+    target_dir = Path(os.path.join(cwd, sub_dir))
 
     info: list[str] = []
-    for f in info_dir.iterdir():
-        f_info = f"- {f.name}: file_size={dir_size(f)} is_dir={f.is_dir()}"
-        info.append(f_info)
+    try:
+        for f in target_dir.iterdir():
+            f_info = f"- {f.name}: file_size={dir_size(f)} is_dir={f.is_dir()}"
+            info.append(f_info)
+    except FileNotFoundError:
+        return f"error: directory not found {target_dir.as_posix()}"
+
     return "\n".join(info)
