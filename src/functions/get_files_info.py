@@ -14,7 +14,7 @@ def dir_size(path: Path | str, ignore_dot=True) -> int:
     if isinstance(path, str):
         path = Path(path)
     size = 0
-    if path.is_dir():
+    if path.is_dir() and not path.is_symlink():
         for f in path.iterdir():
             if ignore_dot and is_hidden(f):
                 continue
@@ -28,7 +28,7 @@ def get_files_info(cwd: str, sub_dir: str = "") -> str:
     if sub_dir != "":
         try:
             check_path_safety(sub_dir)
-        except Exception as err:
+        except ValueError as err:
             return err.args[0]
 
     target_dir = Path(os.path.join(cwd, sub_dir))
