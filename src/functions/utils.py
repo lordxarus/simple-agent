@@ -19,13 +19,12 @@ def check_has_at_least(
     last_not_found_part = ""
     for line in lines:
         for parts in has_at_least:
-            for part in parts:
-                if part not in line:
+            for i, part in enumerate(parts):
+                if part not in line or part != line:
                     last_not_found_part = part
                     break
-            found.append(parts)
-    import pdb
-
+                elif i == len(parts) - 1:
+                    found.append(parts)
     # any() expr returns True if all parts were found and False if not
     return (
         not any(parts for parts in has_at_least if parts not in found),
