@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from functions.errors import Err
+from functions.messages.errors import Err
 
-from .utils import is_path_in_work_dir, dir_size
+from .utils import is_relative_path_in_work_dir, dir_size
 
 
 def get_files_info(cwd: str | Path, sub_dir: str | Path = Path("")) -> str:
@@ -15,7 +15,7 @@ def get_files_info(cwd: str | Path, sub_dir: str | Path = Path("")) -> str:
         combined = cwd / sub_dir
         if not combined.exists():
             return Err.DIRECTORY_NOT_FOUND(combined)
-        if not is_path_in_work_dir(cwd, sub_dir):
+        if not is_relative_path_in_work_dir(cwd, sub_dir):
             return Err.OUTSIDE_WORK_DIR(cwd, sub_dir)
 
     target_dir = cwd / sub_dir

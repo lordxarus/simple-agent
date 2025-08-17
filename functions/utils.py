@@ -1,8 +1,33 @@
 from pathlib import Path
+from types import FunctionType
 
 
-def is_path_in_work_dir(work_dir: str | Path, path: str | Path) -> bool:
-    return Path(path).is_relative_to(Path(work_dir).absolute())
+def _noimpl(file: str, func: str) -> str:
+    return f"noimpl: function {func}()@{file}"
+
+
+def get_noimpl_printer(file_path: str) -> FunctionType:
+    return lambda func: print(
+        f"\n{_noimpl(str(Path(file_path).relative_to(Path().cwd())), func)}"
+    )
+
+
+def format_dict(dict: dict) -> str:
+    return ", ".join([f"{key}={val}" for key, val in dict.items()])
+
+
+def is_relative_path_in_work_dir(work_dir: str | Path, path: str | Path) -> bool:
+    work_dir = Path(work_dir)
+    path = Path(path)
+    pps = path.parts
+    # return not pps[0] == ".." and
+    #
+    # and pps[0].startswith(".")
+    if len(pps) == 1:
+        if pps[0] == "..":
+            return False
+    #     path = work_dir / path
+    return (work_dir / path).is_relative_to(work_dir)
 
 
 def is_hidden(dir: str | Path) -> bool:

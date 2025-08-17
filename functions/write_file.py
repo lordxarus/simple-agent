@@ -1,7 +1,6 @@
-from io import TextIOWrapper
 from pathlib import Path
 
-from functions.errors import Err
+from functions.messages.errors import Err
 from .messages.info import Info
 
 
@@ -22,6 +21,6 @@ def write_file(cwd: str | Path, file_path: str | Path, text: str) -> str:
             return Err.UNKNOWN(err)
 
     # I think it's safe to assume at this point we can access the file_path
-    with combined.open(mode="+at") as file:
+    with combined.open(mode="wt") as file:
         file.write(text)
         return Info.WROTE_FILE(combined, len(text))

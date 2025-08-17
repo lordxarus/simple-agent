@@ -1,5 +1,5 @@
-from functions.errors import Err
-from functions.utils import is_path_in_work_dir
+from functions.messages.errors import Err
+from functions.utils import is_relative_path_in_work_dir
 from pathlib import Path
 
 from .config import gfc as config
@@ -11,7 +11,7 @@ def get_file_content(cwd: str | Path, file_path: str | Path) -> str:
     combined: Path = cwd_p / file_p
     if not combined.exists():
         return Err.FILE_NOT_FOUND(combined)
-    if not is_path_in_work_dir(cwd, file_path):
+    if not is_relative_path_in_work_dir(cwd, file_path):
         return Err.OUTSIDE_WORK_DIR(cwd_p, file_p)
     if not (combined).is_file():
         return Err.EXPECTED_FILE(combined)

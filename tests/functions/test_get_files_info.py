@@ -1,7 +1,7 @@
 from pathlib import Path
 import unittest
 
-from functions.errors import Err
+from functions.messages.errors import Err
 from functions.get_files_info import get_files_info
 from functions.utils import does_each_appear
 from tempfile import TemporaryDirectory
