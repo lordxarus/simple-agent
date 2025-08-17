@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from functions.utils import check_path_safety
+from .utils import check_path_safety
 
 
 def is_hidden(dir: Path | str) -> bool:
@@ -20,7 +20,10 @@ def dir_size(path: Path | str, ignore_dot=True) -> int:
                 continue
             size += dir_size(f, ignore_dot)
     else:
-        size += path.stat().st_size
+        # we open the file here file to make sure we can read it (triggering)
+        # exceptions that are bubbled up to get_files_info
+        with path.open() as buf:
+            size += path.stat().st_size
     return size
 
 
@@ -38,7 +41,11 @@ def get_files_info(cwd: str, sub_dir: str = "") -> str:
         for f in target_dir.iterdir():
             f_info = f"- {f.name}: file_size={dir_size(f)} is_dir={f.is_dir()}"
             info.append(f_info)
-    except FileNotFoundError:
-        return f"error: directory not found {target_dir.as_posix()}"
+    except FileNotFoundError as err:
+        return f"error: file not found {err.filename}"
+    except PermissionError as err:
+        return f"error: no permission for reading file {err.filename}"
+    except OSError as err:
+        return f"error: unknown exception - {err}"
 
     return "\n".join(info)
