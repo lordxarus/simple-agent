@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-python -m unittest discover -s tests/* -f --locals
+python -m unittest discover -s tests/functions -f --locals

@@ -2,28 +2,7 @@ from pathlib import Path
 
 from functions.errors import Err
 
-from .utils import is_path_in_work_dir
-
-
-def is_hidden(dir: str | Path) -> bool:
-    dir = Path(dir)
-    return len([part for part in dir.parts if part.startswith(".")]) > 0
-
-
-def dir_size(path: str | Path, ignore_dot=True) -> int:
-    path = Path(path)
-    size = 0
-    if path.is_dir() and not path.is_symlink():
-        for f in path.iterdir():
-            if ignore_dot and is_hidden(f):
-                continue
-            size += dir_size(f, ignore_dot)
-    else:
-        # we open the file here file to make sure we can read it (triggering)
-        # exceptions that are bubbled up to get_files_info
-        with path.open():
-            size += path.stat().st_size
-    return size
+from .utils import is_path_in_work_dir, dir_size
 
 
 def get_files_info(cwd: str | Path, sub_dir: str | Path = Path("")) -> str:

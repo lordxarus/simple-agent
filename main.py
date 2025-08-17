@@ -24,6 +24,7 @@ def main():
     prompt: str = ""
 
     messages = [types.Content(role="user", parts=[types.Part(text=prompt)])]
+
     if not load_dotenv():
         print("error: couldn't find any api keys in .env")
         exit(1)
