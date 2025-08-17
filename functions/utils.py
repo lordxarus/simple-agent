@@ -1,9 +1,8 @@
 from pathlib import Path
-from typing import Tuple, overload
 
 
-def check_path_safety(cwd: str, sub_dir: str) -> bool:
-    return Path(sub_dir).is_relative_to(Path(cwd).absolute())
+def is_path_in_work_dir(work_dir: str, path: str) -> bool:
+    return Path(path).is_relative_to(Path(work_dir).absolute())
 
 
 def check_has_at_least(

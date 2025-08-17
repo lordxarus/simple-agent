@@ -3,8 +3,8 @@ import unittest
 
 import sys
 
-from ..get_files_info import get_files_info
-from ..utils import check_has_at_least
+from functions.get_files_info import get_files_info
+from functions.utils import check_has_at_least
 from tempfile import TemporaryDirectory
 
 
@@ -73,10 +73,11 @@ class TestGetFilesInfo(unittest.TestCase):
 
     def test_c_drive(self):
         if sys.platform == "win32":
-            assert "C:\\ not in ." in get_files_info(".", "C:\\")
+            # TODO test this
+            assert "C:\\ is outside of" in get_files_info(".", "C:\\")
 
     def test_slash_bin(self):
         if sys.platform != "win32":
-            assert (
-                "error: /bin is outside of calculator" in get_files_info("calculator", "/bin") 
+            assert "error: /bin is outside of calculator" in get_files_info(
+                "calculator", "/bin"
             )

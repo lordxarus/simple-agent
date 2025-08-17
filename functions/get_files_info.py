@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from .utils import check_path_safety
+from .utils import is_path_in_work_dir
 
 
 def is_hidden(dir: Path | str) -> bool:
@@ -22,7 +22,7 @@ def dir_size(path: Path | str, ignore_dot=True) -> int:
     else:
         # we open the file here file to make sure we can read it (triggering)
         # exceptions that are bubbled up to get_files_info
-        with path.open() as buf:
+        with path.open():
             size += path.stat().st_size
     return size
 
@@ -32,7 +32,7 @@ def get_files_info(cwd: str, sub_dir: str = "") -> str:
         combned_path = Path(cwd).joinpath(Path(sub_dir))
         if not combned_path.exists():
             return f"error: directory does not exist {combned_path.absolute()}"
-        if not check_path_safety(cwd, sub_dir):
+        if not is_path_in_work_dir(cwd, sub_dir):
             return f"error: {combned_path.absolute()} is outside of {cwd}"
 
     target_dir = Path(os.path.join(cwd, sub_dir))
