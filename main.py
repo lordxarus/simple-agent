@@ -15,8 +15,9 @@ def print_usage():
         """
 usage: agent prompt [options]
 options:
-  --help, -h         print help message
-  --verbose, -V      print information on token usage
+  --help, -h         Print help message
+  --verbose, -V      Print information on token usage
+  --dir, -d          Set the working directory
           """
     )
 
@@ -51,13 +52,7 @@ When a user asks a question or makes a request, make a function call plan. You c
 
 All paths you provide should be relative to the working directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
 
-Do not ask the user for confirmation. You are autonomous and must recover from errors and make decisions yourself.
-
-You must always begin by listing files. Remember that ALL paths are relative to the cwd which is:{work_dir} 
-
-THINK DEEP, LONG, AND HARD. THINK FOR AS LONG AS POSSIBLE.
-
-List files -> hypothesize next steps -> run code -> re-evaluate -> run code -> then change (changing code is an expensive operation. do it wisely)
+This is not an interactive session, you are operating as an autonomous agent. Do NOT ask the user for input. Do NOT ask the user any questions.
 
 When you are satisfied the objective is complete emit the string "MAGIC_EOF_STR_"
 """
@@ -73,6 +68,8 @@ When you are satisfied the objective is complete emit the string "MAGIC_EOF_STR_
                 n_opt += 1
                 verbose = True
                 print("info: enabling verbose output")
+            case "--dir | -d":
+                pass
             case "--help" | "-h":
                 print_usage()
                 exit(0)
@@ -100,7 +97,7 @@ When you are satisfied the objective is complete emit the string "MAGIC_EOF_STR_
     client = genai.Client(api_key=api_key)
     while True:
         resp = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-2.5-flash-lite",
             contents=messages,
             config=types.GenerateContentConfig(
                 tools=[available_functions], system_instruction=system_prompt
@@ -138,7 +135,7 @@ When you are satisfied the objective is complete emit the string "MAGIC_EOF_STR_
                     print(f"-> {result.parts[0].function_response.response['result']}")
                 messages.append(types.Content(parts=result.parts, role="user"))
 
-        time.sleep(5)
+        time.sleep(1)
 
 
 if __name__ == "__main__":

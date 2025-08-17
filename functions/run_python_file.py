@@ -21,15 +21,19 @@ def run_python_file(
     if not full_path.exists():
         return Err.FILE_NOT_FOUND(full_path)
 
+    args.insert(0, str(full_path))
+    # -u makes Python's output unbuffered.
+    # stderr and stdout are lost without this when timeouts happen
+    args.insert(0, "-u")
     args.insert(0, sys.executable)
-    args.insert(1, str(full_path))
 
-    # TODO pass a dict to env parameter that doesn't have Gemini API
+    # TODO pass a dict as argument to env parameter that doesn't have Gemini API
     # key included
     # print(args)
-    done_proc = subprocess.run(
-        args, capture_output=True, timeout=30, encoding="utf-8"
-    )
+    try:
+        done_proc = subprocess.run(args, capture_output=True, timeout=5, text=True)
+    except subprocess.TimeoutExpired as err:
+        return Info.COMMAND_TIMED_OUT(f"{args[0]}/{args[1]}", str(err.stdout), str(err.stderr))
     stdout = done_proc.stdout.strip()
     stderr = done_proc.stderr.strip()
     try:
