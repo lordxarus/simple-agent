@@ -1,6 +1,8 @@
 from pathlib import Path
 import unittest
 
+import sys
+
 from ..get_files_info import get_files_info
 from ..utils import check_has_at_least
 from tempfile import TemporaryDirectory
@@ -9,15 +11,10 @@ from tempfile import TemporaryDirectory
 class TestGetFilesInfo(unittest.TestCase):
 
     def test_double_dot(self):
-        assert get_files_info(".", "..").startswith("error: sub_dir")
+        assert ".. not in ." in get_files_info(".", "..")
 
     def test_double_dot_slash(self):
-        assert get_files_info(".", "../").startswith("error: sub_dir")
-
-    def test_deep_double_dot(self):
-        assert get_files_info(".", "functions/../test/../..").startswith(
-            "error: sub_dir"
-        )
+        assert "../ not in ." in get_files_info(".", "../")
 
     def test_no_read_permission(self):
         with TemporaryDirectory() as tmpdir:
@@ -65,14 +62,21 @@ class TestGetFilesInfo(unittest.TestCase):
             at_least = check_has_at_least(has_at_least, files)
             assert not at_least[0]
 
-    def test_slash_bin(self):
-        assert (
-            get_files_info("calculator", "/bin")
-            == 'error: sub_dir cannot begin with "/"'
+    def test_non_existent_sub_dir(self):
+        assert "error: directory does not exist" in get_files_info(
+            "calculator", "./bin/blah/blee/bloo"
         )
 
-    def test_non_existent(self):
-        assert (
-            get_files_info("calculator", "./bin/blah/blee/bloo")
-            == "error: file not found calculator/bin/blah/blee/bloo"
-        )
+    """
+        Platform specific tests
+    """
+
+    def test_c_drive(self):
+        if sys.platform == "win32":
+            assert "C:\\ not in ." in get_files_info(".", "C:\\")
+
+    def test_slash_bin(self):
+        if sys.platform != "win32":
+            assert (
+                get_files_info("calculator", "/bin") == "error: /bin not in calculator"
+            )

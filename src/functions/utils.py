@@ -1,11 +1,10 @@
 from pathlib import Path
 
 
-def check_path_safety(sub_dir: str) -> None:
-    if sub_dir.startswith("/"):
-        raise ValueError('error: sub_dir cannot begin with "/"')
-    if len([part for part in Path(sub_dir).parts if part == ".."]) > 0:
-        raise ValueError(f'error: sub_dir  cannot contain ".."')
+def check_path_safety(sub_dir: str, cwd: str = "") -> None:
+    if cwd != "":
+        if not Path(sub_dir).is_relative_to(Path(cwd).absolute()):
+            raise ValueError(f"error: {sub_dir} not in {cwd}")
 
 
 def check_has_at_least(
