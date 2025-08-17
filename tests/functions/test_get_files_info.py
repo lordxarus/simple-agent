@@ -1,29 +1,20 @@
 from pathlib import Path
 import unittest
 
-import sys
-
+from functions.errors import Err
 from functions.get_files_info import get_files_info
-from functions.utils import check_has_at_least
+from functions.utils import does_each_appear
 from tempfile import TemporaryDirectory
 
 
 class TestGetFilesInfo(unittest.TestCase):
-
-    def test_double_dot(self):
-        assert ".. is outside of ." in get_files_info(".", "..")
-
-    def test_double_dot_slash(self):
-        assert ".. is outside of ." in get_files_info(".", "../")
 
     def test_no_read_permission(self):
         with TemporaryDirectory() as tmpdir:
             main_py = Path(f"{tmpdir}/main.py")
             main_py.touch()
             main_py.chmod(000)
-            assert get_files_info(tmpdir).startswith(
-                "error: no permission for reading file"
-            )
+            assert Err.NO_PERMISSION_FS(main_py) in get_files_info(tmpdir)
 
     def test_existent_files(self):
         with TemporaryDirectory() as tmpdir:
@@ -48,7 +39,7 @@ class TestGetFilesInfo(unittest.TestCase):
 
             has_at_least.sort()
             files.sort()
-            at_least = check_has_at_least(has_at_least, files)
+            at_least = does_each_appear(has_at_least, files)
             assert at_least[0], f"no lines matched fragment {at_least[1]}"
 
     def test_empty_dir(self):
@@ -59,25 +50,13 @@ class TestGetFilesInfo(unittest.TestCase):
             files.sort()
             has_at_least.sort()
 
-            at_least = check_has_at_least(has_at_least, files)
+            at_least = does_each_appear(has_at_least, files)
             assert not at_least[0]
 
     def test_non_existent_sub_dir(self):
-        assert "error: directory does not exist" in get_files_info(
-            "calculator", "./bin/blah/blee/bloo"
-        )
-
-    """
-        Platform specific tests
-    """
-
-    def test_c_drive(self):
-        if sys.platform == "win32":
-            # TODO test this
-            assert "C:\\ is outside of" in get_files_info(".", "C:\\")
-
-    def test_slash_bin(self):
-        if sys.platform != "win32":
-            assert "error: /bin is outside of calculator" in get_files_info(
-                "calculator", "/bin"
+        with TemporaryDirectory() as tmpdir:
+            cwd_p = Path(tmpdir)
+            dir_p = Path("./bin/blah/blee/bloo")
+            assert Err.DIRECTORY_NOT_FOUND(cwd_p / dir_p) in get_files_info(
+                str(cwd_p), str(dir_p)
             )

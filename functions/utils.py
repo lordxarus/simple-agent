@@ -1,11 +1,11 @@
 from pathlib import Path
 
 
-def is_path_in_work_dir(work_dir: str, path: str) -> bool:
+def is_path_in_work_dir(work_dir: str | Path, path: str | Path) -> bool:
     return Path(path).is_relative_to(Path(work_dir).absolute())
 
 
-def check_has_at_least(
+def does_each_appear(
     has_at_least: list[list[str]], lines: list[str]
 ) -> tuple[bool, str]:
     """

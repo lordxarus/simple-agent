@@ -1,19 +1,20 @@
+from functions.errors import Err
 from functions.utils import is_path_in_work_dir
 from pathlib import Path
 
 from .config import gfc as config
 
 
-def get_file_content(cwd: str, file_path: str) -> str:
+def get_file_content(cwd: str | Path, file_path: str | Path) -> str:
     cwd_p = Path(cwd)
     file_p = Path(file_path)
     combined: Path = cwd_p / file_p
     if not combined.exists():
-        return f"error: file {combined} does not exist"
+        return Err.FILE_NOT_FOUND(combined)
     if not is_path_in_work_dir(cwd, file_path):
-        return f"error: {file_p} is outside of {cwd_p}"
-    if not (cwd_p / file_p).is_file():
-        return f"error: {file_p} is not a file"
+        return Err.OUTSIDE_WORK_DIR(cwd_p, file_p)
+    if not (combined).is_file():
+        return Err.EXPECTED_FILE(combined)
     try:
         with combined.open() as file:
             text: str = file.read()
@@ -24,12 +25,11 @@ def get_file_content(cwd: str, file_path: str) -> str:
             trunced = text[: config.N_CHAR]
             trunced = trunced[: -len(trunc_msg)]
             trunced += trunc_msg
-            print(trunced)
             return trunced
 
     except FileNotFoundError as err:
-        return f"error: file not found {err.filename}"
+        return Err.FILE_NOT_FOUND(err.filename)
     except PermissionError as err:
-        return f"error: no permission for reading file {err.filename}"
+        return Err.NO_PERMISSION_FS(err.filename)
     except OSError as err:
-        return f"error: unknown exception - {err}"
+        return Err.UNKNOWN(err)

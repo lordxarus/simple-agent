@@ -1,18 +1,17 @@
-import os
 from pathlib import Path
+
+from functions.errors import Err
 
 from .utils import is_path_in_work_dir
 
 
-def is_hidden(dir: Path | str) -> bool:
-    if isinstance(dir, str):
-        dir = Path(dir)
+def is_hidden(dir: str | Path) -> bool:
+    dir = Path(dir)
     return len([part for part in dir.parts if part.startswith(".")]) > 0
 
 
-def dir_size(path: Path | str, ignore_dot=True) -> int:
-    if isinstance(path, str):
-        path = Path(path)
+def dir_size(path: str | Path, ignore_dot=True) -> int:
+    path = Path(path)
     size = 0
     if path.is_dir() and not path.is_symlink():
         for f in path.iterdir():
@@ -27,15 +26,20 @@ def dir_size(path: Path | str, ignore_dot=True) -> int:
     return size
 
 
-def get_files_info(cwd: str, sub_dir: str = "") -> str:
-    if sub_dir != "":
-        combned_path = Path(cwd).joinpath(Path(sub_dir))
-        if not combned_path.exists():
-            return f"error: directory does not exist {combned_path.absolute()}"
-        if not is_path_in_work_dir(cwd, sub_dir):
-            return f"error: {combned_path.absolute()} is outside of {cwd}"
+def get_files_info(cwd: str | Path, sub_dir: str | Path = Path("")) -> str:
+    cwd = Path(cwd)
+    sub_dir = Path(sub_dir)
 
-    target_dir = Path(os.path.join(cwd, sub_dir))
+    # we assume that cwd is valid and only check if sub_dir exists if it
+    # has been passed to us
+    if any(sub_dir.parts):
+        combined = cwd / sub_dir
+        if not combined.exists():
+            return Err.DIRECTORY_NOT_FOUND(combined)
+        if not is_path_in_work_dir(cwd, sub_dir):
+            return Err.OUTSIDE_WORK_DIR(cwd, sub_dir)
+
+    target_dir = cwd / sub_dir
 
     info: list[str] = []
     try:
@@ -43,10 +47,10 @@ def get_files_info(cwd: str, sub_dir: str = "") -> str:
             f_info = f"- {f.name}: file_size={dir_size(f)} is_dir={f.is_dir()}"
             info.append(f_info)
     except FileNotFoundError as err:
-        return f"error: file not found {err.filename}"
+        return Err.FILE_NOT_FOUND(err.filename)
     except PermissionError as err:
-        return f"error: no permission for reading file {err.filename}"
+        return Err.NO_PERMISSION_FS(err.filename)
     except OSError as err:
-        return f"error: unknown exception - {err}"
+        return Err.UNKNOWN(err)
 
     return "\n".join(info)
