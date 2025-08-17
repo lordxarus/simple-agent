@@ -11,10 +11,10 @@ from tempfile import TemporaryDirectory
 class TestGetFilesInfo(unittest.TestCase):
 
     def test_double_dot(self):
-        assert ".. not in ." in get_files_info(".", "..")
+        assert ".. is outside of ." in get_files_info(".", "..")
 
     def test_double_dot_slash(self):
-        assert "../ not in ." in get_files_info(".", "../")
+        assert ".. is outside of ." in get_files_info(".", "../")
 
     def test_no_read_permission(self):
         with TemporaryDirectory() as tmpdir:
@@ -78,5 +78,5 @@ class TestGetFilesInfo(unittest.TestCase):
     def test_slash_bin(self):
         if sys.platform != "win32":
             assert (
-                get_files_info("calculator", "/bin") == "error: /bin not in calculator"
+                "error: /bin is outside of calculator" in get_files_info("calculator", "/bin") 
             )

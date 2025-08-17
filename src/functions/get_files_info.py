@@ -32,10 +32,8 @@ def get_files_info(cwd: str, sub_dir: str = "") -> str:
         combned_path = Path(cwd).joinpath(Path(sub_dir))
         if not combned_path.exists():
             return f"error: directory does not exist {combned_path.absolute()}"
-        try:
-            check_path_safety(sub_dir, cwd)
-        except ValueError as err:
-            return err.args[0]
+        if not check_path_safety(cwd, sub_dir):
+            return f"error: {combned_path.absolute()} is outside of {cwd}"
 
     target_dir = Path(os.path.join(cwd, sub_dir))
 

@@ -1,10 +1,9 @@
 from pathlib import Path
+from typing import Tuple, overload
 
 
-def check_path_safety(sub_dir: str, cwd: str = "") -> None:
-    if cwd != "":
-        if not Path(sub_dir).is_relative_to(Path(cwd).absolute()):
-            raise ValueError(f"error: {sub_dir} not in {cwd}")
+def check_path_safety(cwd: str, sub_dir: str) -> bool:
+    return Path(sub_dir).is_relative_to(Path(cwd).absolute())
 
 
 def check_has_at_least(
